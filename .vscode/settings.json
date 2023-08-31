@@ -1,0 +1,15 @@
+{
+    "stm32-for-vscode.openOCDPath": "/Users/vpopov/Library/Application Support/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/openocd/0.12.0-1.1/.content/bin/openocd",
+    "stm32-for-vscode.armToolchainPath": "/Users/vpopov/Library/Application Support/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/12.3.1-1.1.1/.content/bin",
+    "cortex-debug.armToolchainPath": "/Users/vpopov/Library/Application Support/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/12.3.1-1.1.1/.content/bin",
+    "cortex-debug.openocdPath": "/Users/vpopov/Library/Application Support/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/openocd/0.12.0-1.1/.content/bin/openocd",
+    "files.associations": {
+        "check_config.h": "c",
+        "mbedtls.h": "c",
+        "ctr_drbg.h": "c",
+        "entropy.h": "c",
+        "ssl.h": "c",
+        "mbedtls_config.h": "c",
+        "config.h": "c"
+    }
+}
