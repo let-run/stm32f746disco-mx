@@ -11,5 +11,6 @@
         "ssl.h": "c",
         "mbedtls_config.h": "c",
         "config.h": "c"
-    }
+    },
+    "cortex-debug.variableUseNaturalFormat": false
 }

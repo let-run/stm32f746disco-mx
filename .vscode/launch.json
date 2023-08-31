@@ -13,7 +13,16 @@
             "configFiles": [
                 "openocd.cfg"
             ],
-            "svdFile": "STM32F446.svd"
+            "svdFile": "STM32F446.svd",
+            "swoConfig": {
+                "enabled": true,
+                "cpuFrequency": 216000000,
+                "swoFrequency": 1000000,
+                "source": "probe",
+                "decoders": [
+                    { "type": "console", "label": "ITM", "port": 0 }
+                ]
+            }
         },
         {
             "showDevDebugOutput": "parsed",
