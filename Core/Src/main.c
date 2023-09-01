@@ -28,8 +28,6 @@
 #include "stdio.h"
 #include <string.h>
 
-#include "lwip/prot/ethernet.h"
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -69,6 +67,8 @@ static void MX_FMC_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
+
+static void MPU_Config_SDRAM(void);
 
 /* USER CODE END PFP */
 
@@ -125,31 +125,7 @@ int main(void)
   /* Call PreOsInit function */
   MX_MBEDTLS_Init();
   /* USER CODE BEGIN 2 */
-  
-  
-  MPU_Region_InitTypeDef MPU_InitStruct;
-  /* Disable the MPU */ 
-  HAL_MPU_Disable();
-  /* Configure the MPU attributes for SDRAM */
-
-  MPU_InitStruct.Enable = MPU_REGION_ENABLE;
-  MPU_InitStruct.BaseAddress = 0xC0000000;
-  MPU_InitStruct.Size = MPU_REGION_SIZE_4MB;
-  MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-  MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
-  MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
-  MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
-  MPU_InitStruct.Number = MPU_REGION_NUMBER0;
-  MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
-  MPU_InitStruct.SubRegionDisable = 0x00;
-  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
-
-  HAL_MPU_ConfigRegion(&MPU_InitStruct);
-
-  /* Enable the MPU */
-  HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
-
-  
+  MPU_Config_SDRAM();
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -294,14 +270,14 @@ static void MX_FMC_Init(void)
 
   /* USER CODE BEGIN FMC_Init 2 */
 
-// /* Step 8: Set the refresh rate counter - refer to section SDRAM refresh timer register in RM0455 */
-// /* Set the device refresh rate
-//  * COUNT = [(SDRAM self refresh time / number of row) x  SDRAM CLK] – 20
-//		  = [(64ms/4096) * 100MHz] - 20 = 1562.5 - 20 ~ 1542
-//		  = [(70ms/4096) * 166MHz] - 20 = 2816
-//		  = [(64ms/4096) * 166MHz] - 20 = 2573.75 ~ 2573
-//		  = [(64ms/4096) * 100MHz] - 20 = 1480 ~ 1480
-//		  */
+  // /* Step 8: Set the refresh rate counter - refer to section SDRAM refresh timer register in RM0455 */
+  // /* Set the device refresh rate
+  //  * COUNT = [(SDRAM self refresh time / number of row) x  SDRAM CLK] – 20
+  //		  = [(64ms/4096) * 100MHz] - 20 = 1562.5 - 20 ~ 1542
+  //		  = [(70ms/4096) * 166MHz] - 20 = 2816
+  //		  = [(64ms/4096) * 166MHz] - 20 = 2573.75 ~ 2573
+  //		  = [(64ms/4096) * 100MHz] - 20 = 1480 ~ 1480
+  //		  */
 
   #define SDRAM_MODEREG_BURST_LENGTH_1             ((uint16_t)0x0000)
   #define SDRAM_MODEREG_BURST_LENGTH_2             ((uint16_t)0x0001)
@@ -830,23 +806,31 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-  
-struct unpckdstrct {
-  char  c;  // one byte
-  int   i;  // four bytes
-  short s;  // two bytes
-};
+static void MPU_Config_SDRAM(void) {
+  MPU_Region_InitTypeDef MPU_InitStruct;
+  /* Disable the MPU */ 
+  HAL_MPU_Disable();
+  /* Configure the MPU attributes for SDRAM */
 
-struct pckdstrct {
-  char  c;  // one byte
-  int   i;  // four bytes
-  short s;  // two bytes
-} __attribute__ ((__packed__));
+  MPU_InitStruct.Enable = MPU_REGION_ENABLE;
+  MPU_InitStruct.BaseAddress = 0xC0000000;
+  MPU_InitStruct.Size = MPU_REGION_SIZE_4MB;
+  MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
+  MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
+  MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+  MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
+  MPU_InitStruct.Number = MPU_REGION_NUMBER0;
+  MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
+  MPU_InitStruct.SubRegionDisable = 0x00;
+  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
 
-__attribute__ ((section(".lwip"), used)) struct unpckdstrct unpckd;
-__attribute__ ((section(".lwip"), used)) struct pckdstrct pckd;
+  HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
-__attribute__ ((section(".lwip"), used)) struct eth_addr dhwaddr;
+  /* Enable the MPU */
+  HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
+}
+
+// __attribute__ ((section(".lwip"), used)) struct eth_addr dhwaddr;
 
 /* USER CODE END 4 */
 
@@ -859,44 +843,8 @@ __attribute__ ((section(".lwip"), used)) struct eth_addr dhwaddr;
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-  /* USER CODE BEGIN 5 */
-
-  unpckd.c = 'u';
-  unpckd.i = 0x12345678;
-  unpckd.s = 0x4455;
-  
-  pckd.c = 'p';
-  pckd.i = 0xabcdef99;
-  pckd.s = 0x6677;
-
-  uint8_t u1[12];
-  uint8_t u2[12];
-
-  memcpy(&u1, &unpckd, sizeof(u1));
-  memcpy(&u2, &pckd, sizeof(u2));
-
-  struct eth_addr shwaddr = {1,2,3,4,5,6};
-  //memcpy(0xc000005e, &shwaddr, ETH_HWADDR_LEN);
-  memcpy(0xc000003a, &shwaddr, ETH_HWADDR_LEN);
-  memcpy(&shwaddr, 0xc000003a, ETH_HWADDR_LEN);
-
-  // u8_t addr[6];
-  // uint32_t *pSdramAddress;
-  // pSdramAddress = (uint32_t*)0xc0000014; //pckd
-  // u1 = *pSdramAddress;
-  // pSdramAddress = (uint32_t*)0xc000001C; //unpckd
-  // u2 = *pSdramAddress;
-
-
-  // uint32_t *pSdramAddress;
-  // uint32_t u32;
-  // pSdramAddress = (uint32_t*)0xC0000000;
-  // *pSdramAddress = 0xa0b0c0d0;
-  // u32 = 0; 
-  // u32 = *pSdramAddress;
-  
-  
-  printf("MX_LWIP_Init before %08x, %08x\n", u1, u2);
+  /* USER CODE BEGIN 5 */  
+  printf("MX_LWIP_Init before\n");
   
   MX_LWIP_Init();
 
