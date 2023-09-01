@@ -57,8 +57,10 @@ Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_pwr.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_pwr_ex.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc_ex.c \
+Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_sdram.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_tim_ex.c \
+Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_ll_fmc.c \
 LWIP/App/lwip.c \
 LWIP/Target/ethernetif.c \
 MBEDTLS/App/mbedtls.c \
@@ -276,15 +278,17 @@ AS_DEFS =
 
 # C defines
 C_DEFS =  \
--DMBEDTLS_CONFIG_FILE="<mbedtls_config.h>"\ \
+-DMBEDTLS_CONFIG_FILE="<mbedtls_config.h>" \
 -DMBEDTLS_NO_PLATFORM_ENTROPY \
+-DSTM32F746xx \
 -DUSE_HAL_DRIVER
 
 
 # CXX defines
 CXX_DEFS =  \
--DMBEDTLS_CONFIG_FILE="<mbedtls_config.h>"\ \
+-DMBEDTLS_CONFIG_FILE="<mbedtls_config.h>" \
 -DMBEDTLS_NO_PLATFORM_ENTROPY \
+-DSTM32F746xx \
 -DUSE_HAL_DRIVER
 
 

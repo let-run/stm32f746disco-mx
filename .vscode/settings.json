@@ -10,7 +10,11 @@
         "entropy.h": "c",
         "ssl.h": "c",
         "mbedtls_config.h": "c",
-        "config.h": "c"
+        "config.h": "c",
+        "bpstruct.h": "c",
+        "epstruct.h": "c",
+        "ethernet.h": "c",
+        "etharp.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false
 }

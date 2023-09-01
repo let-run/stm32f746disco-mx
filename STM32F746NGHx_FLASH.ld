@@ -179,8 +179,6 @@ SECTIONS
     . = ALIGN(8);
   } >RAM
 
-  
-
   /* Remove information from the standard libraries */
   /DISCARD/ :
   {
@@ -190,6 +188,17 @@ SECTIONS
   }
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
+
+  .lwip (NOLOAD) :
+  {
+    . = ALIGN(1);
+    __SDRAM_START__ = .;
+    *(.lwip)
+    *(.lwip*)
+    . = ALIGN(1);
+    __SDRAM_END__ = .;
+  } >EXTRAM 
+
   .RxDecripSection (NOLOAD) : { *(.RxDescripSection) } >Memory_B1
   .TxDescripSection (NOLOAD) : { *(.TxDescripSection) } >Memory_B2
 }

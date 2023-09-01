@@ -33,8 +33,9 @@
         "Middlewares/Third_Party/mbedTLS/include/mbedtls"
       ],
       "defines": [
-        "MBEDTLS_CONFIG_FILE=\"<mbedtls_config.h>\"\\",
+        "MBEDTLS_CONFIG_FILE=\"<mbedtls_config.h>\"",
         "MBEDTLS_NO_PLATFORM_ENTROPY",
+        "STM32F746xx",
         "USE_HAL_DRIVER"
       ],
       "compilerPath": "/Users/vpopov/Library/Application Support/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/arm-none-eabi-gcc/12.3.1-1.1.1/.content/bin/arm-none-eabi-gcc"
