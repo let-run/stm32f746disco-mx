@@ -51,42 +51,31 @@ extern "C" {
  * MEM_SIZE: the size of the heap memory. If the application will send
  * a lot of data that needs to be copied, this should be set high.
  */
-//#define MEM_SIZE               5 * 1024
+#define MEM_SIZE               128 * 1024
+
+#define MBEDTLS_PEM_PARSE_C      1 
 //#define MEMP_MEM_INIT          1
 
-/*
- To relocate a pool, declare it as extern in cc.h. Example for GCC:
- extern u8_t \_\_attribute\_\_((section(".onchip_mem"))) memp_memory_my_private_pool_base[];
- .lwip           0x20010128     0x81b7 load address 0x08010b10
- .lwip          0x20010128     0x4983 build/ethernetif.o
-                0x20010128                memp_memory_RX_POOL_base
- *fill*         0x20014aab        0x1 
- .lwip          0x20014aac      0x653 build/mem.o
-                0x20014aac                ram_heap
- *fill*         0x200150ff        0x1 
- .lwip          0x20015100     0x31df build/memp.o
-                0x20015100                memp_memory_PBUF_POOL_base
-                0x20017704                memp_memory_PBUF_base
-                0x20017808                memp_memory_NETDB_base
-                0x20017940                memp_memory_SYS_TIMEOUT_base
-                0x20017984                memp_memory_TCPIP_MSG_INPKT_base
-                0x20017a08                memp_memory_TCPIP_MSG_API_base
-                0x20017a8c                memp_memory_NETCONN_base
-                0x20017b30                memp_memory_NETBUF_base
-                0x20017b54                memp_memory_FRAG_PBUF_base
-                0x20017cc0                memp_memory_REASSDATA_base
-                0x20017d64                memp_memory_TCP_SEG_base
-                0x20017e68                memp_memory_TCP_PCB_LISTEN_base
-                0x20017f4c                memp_memory_TCP_PCB_base
-                0x2001825c                memp_memory_UDP_PCB_base
-                0x200182e0                        . = ALIGN (0x4)
- */
+
+#define LWIP_ALTCP 1
+#define LWIP_ALTCP_TLS 1
+#define LWIP_ALTCP_TLS_MBEDTLS 1
+
+// #define LWIP_DEBUG
+// #define TCPIP_DEBUG                LWIP_DBG_ON
+// #define ALTCP_MBEDTLS_DEBUG        LWIP_DBG_ON
+// #define PBUF_DEBUG                 LWIP_DBG_OFF
+// #define ETHARP_DEBUG               LWIP_DBG_OFF
 
 
 
+#define MBEDTLS_SSL_MAX_CONTENT_LEN   16384
+
+#define TCP_MSS     1024 //1536
+#define TCP_SND_BUF TCP_MSS * 4
+#define TCP_WND     TCP_MSS * 4
 
 // #define LWIP_RAM_HEAP_POINTER 0xC0000000
-// extern u8_t __attribute__((section(".lwip"))) ram_heap[];
 #define LWIP_DECLARE_MEMORY_ALIGNED(variable_name, size) __attribute__ ((section(".lwip"), used)) u8_t variable_name[LWIP_MEM_ALIGN_BUFFER(size)]
 
 /* USER CODE END EM */

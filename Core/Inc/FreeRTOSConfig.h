@@ -56,6 +56,11 @@
 #define configENABLE_FPU                         0
 #define configENABLE_MPU                         0
 
+#define configRECORD_STACK_HIGH_ADDRESS 1
+// #define configGENERATE_RUN_TIME_STATS 1
+// #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() /* Define this to initialize your timer/counter */
+// #define portGET_RUN_TIME_COUNTER_VALUE()          /* Define this to sample the timer/counter */
+
 #define configUSE_PREEMPTION                     1
 #define configSUPPORT_STATIC_ALLOCATION          1
 #define configSUPPORT_DYNAMIC_ALLOCATION         1
@@ -65,7 +70,7 @@
 #define configTICK_RATE_HZ                       ((TickType_t)1000)
 #define configMAX_PRIORITIES                     ( 56 )
 #define configMINIMAL_STACK_SIZE                 ((uint16_t)128)
-#define configTOTAL_HEAP_SIZE                    ((size_t)15360)
+#define configTOTAL_HEAP_SIZE                    ((size_t)30360)
 #define configMAX_TASK_NAME_LEN                  ( 16 )
 #define configUSE_TRACE_FACILITY                 1
 #define configUSE_16_BIT_TICKS                   0

@@ -23,10 +23,14 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "string.h"
-
 #include "stdio.h"
 #include <string.h>
+
+#include "lwip/altcp_tls.h"
+#include "lwip/apps/mqtt.h"
+
+#include "mbedtls/x509.h"
+#include "mbedtls/x509_crt.h"
 
 /* USER CODE END Includes */
 
@@ -814,7 +818,7 @@ static void MPU_Config_SDRAM(void) {
 
   MPU_InitStruct.Enable = MPU_REGION_ENABLE;
   MPU_InitStruct.BaseAddress = 0xC0000000;
-  MPU_InitStruct.Size = MPU_REGION_SIZE_4MB;
+  MPU_InitStruct.Size = MPU_REGION_SIZE_16MB;
   MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
   MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
   MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
@@ -832,6 +836,136 @@ static void MPU_Config_SDRAM(void) {
 
 // __attribute__ ((section(".lwip"), used)) struct eth_addr dhwaddr;
 
+static const unsigned char ca_cert[] = "-----BEGIN CERTIFICATE-----\r\n"
+    "MIICrDCCAZQCCQC2+5T6IOpr6TANBgkqhkiG9w0BAQsFADAXMRUwEwYDVQQDDAxo\r\n"
+    "b21lLmxldC5ydW4wIBcNMjMwMTA3MTM1NzExWhgPMjA1MjEyMzAxMzU3MTFaMBcx\r\n"
+    "FTATBgNVBAMMDGhvbWUubGV0LnJ1bjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC\r\n"
+    "AQoCggEBALAJaYQg9MgBo7EOXoS1PD3N6DAB+C9aS45wqsdOLwlmZF9KSyHHkVpO\r\n"
+    "ujChBbBHl/XrKnsH+ANIVSwjE/10vHgmkUcS3n/3GXutUPDstX7w22FLRVbpe/35\r\n"
+    "DZPI310tLVTQri1JveX9Xqfc0G6qv1GCz91Ijqj1SvUSB30WR2R4QotXb6qqcD0r\r\n"
+    "Lhc7PAwPtfYcPxbUYXPIro09sglkM6xNowuDrU0r0IMz0vR0vT1YNkYjRCnPmeTE\r\n"
+    "UE+judNd51poPTf0wM0LeYGyGIHmLB1i1dz5V/rTzvbXFtBBQ1iHDx1on+gLMMyC\r\n"
+    "CVGA4lo+2jM/JIfYXVaUHVNQzFyhApcCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEA\r\n"
+    "hoq7MeL0+aZ1MmSTKWtlGij+1QijMeGLQGk1ZuF6dBU7h0BmeG3/KEOMKnI6TsID\r\n"
+    "XgeJdXJRNZ7NWMMDWwdMuFZDwgzygVbGbhxIUhY9i544cjC1rENjXDI+Et2Fvnii\r\n"
+    "Q5TQCXGooozIJB79oWxzSNYg9dbeVC8LFFxsGBW3VsPsO8hFIH64bwUu/sv4GZeP\r\n"
+    "1phvRrK2uMywPrIv+mS+ABpIPXEgFDCbVD0L18iQCY6XyRykoTpXkTqKwnjDkKTK\r\n"
+    "Zp3Ylxm78DPIS0zUcF5FTFpY6eA4dcCpn7W/BQpnkEBCDdN9V+sTqMB5JxAG68/q\r\n"
+    "QPDoVD9G0RUwucDW9JosHg==\r\n"
+    "-----END CERTIFICATE-----\r\n";
+static const unsigned char client_cert[] = "-----BEGIN CERTIFICATE-----\r\n"
+    "MIICzjCCAbagAwIBAgIBAjANBgkqhkiG9w0BAQsFADAXMRUwEwYDVQQDDAxob21l\r\n"
+    "LmxldC5ydW4wHhcNMjMwMTA3MTM1NzExWhcNMjUwMTA2MTM1NzExWjAUMRIwEAYD\r\n"
+    "VQQDDAlsb2NhbGhvc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDR\r\n"
+    "kD/WsgqTd/HKI+vHm3o1mVbEZtjWs0UEVtsbdq5q8QH+kdgoPpTInp6t1Opp/dXv\r\n"
+    "NRoWYntoPVsuPJileqd1bm6gDzY1XbR4dAZSI6qPoz6dYFH1phqRWaeeSYHrOLbw\r\n"
+    "k39u2j9Lk+skof6k3Iw/V9s9TQ58frlI1RyhCQZQweD0VpXQmfEPwtpUkeM4PnRG\r\n"
+    "BfYSTv7v7f6GyobRY7/ViX7oZT63RNMxv0WFkm8Kstih4lg+tKPhGq9X6fKKx5Jb\r\n"
+    "TXyI6XO0407y2rO42kLRag7jDIWv4z+89fWzL6J9b5yhxw+pltaIn1CQqEqcoDLA\r\n"
+    "l1hsPK2UCdZRK10ZcAajAgMBAAGjKDAmMAwGA1UdEwEB/wQCMAAwFgYDVR0lAQH/\r\n"
+    "BAwwCgYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAKPY30tPc7qOZptkNSLu\r\n"
+    "ogMHNNh1tv6uDHLQgMUN+bwWImK53JfHwITzNb0pnozP64wTWv11qlgSd9bUIRLb\r\n"
+    "ocbCxrHFsV2e80YU8eCx0rlficN4T5J2IvM9C1DpBOG+07p3ZXyaIq98JzNCiTCv\r\n"
+    "pYosP/8CCiDgz1q67vgkxBSto9T5Z/BjbsLPVSg1RH3Q6OvWkq9A9JzRIKoVLB1N\r\n"
+    "xDwH2/emphsuUI2Pg/BRXPsDGpLCYqo5t887JEG2RF93eMBxqD2ZjAffiIewpVli\r\n"
+    "hMxWdgaFbSHeCZb4Ht/XPCgVj0pHQxk0Mf7NDC2HVGht/3oi1ojFRRZIxBIbxQYr\r\n"
+    "/ac=\r\n"
+    "-----END CERTIFICATE-----\r\n";
+static const unsigned char client_key[] = "-----BEGIN RSA PRIVATE KEY-----\r\n"
+    "MIIEpAIBAAKCAQEA0ZA/1rIKk3fxyiPrx5t6NZlWxGbY1rNFBFbbG3auavEB/pHY\r\n"
+    "KD6UyJ6erdTqaf3V7zUaFmJ7aD1bLjyYpXqndW5uoA82NV20eHQGUiOqj6M+nWBR\r\n"
+    "9aYakVmnnkmB6zi28JN/bto/S5PrJKH+pNyMP1fbPU0OfH65SNUcoQkGUMHg9FaV\r\n"
+    "0JnxD8LaVJHjOD50RgX2Ek7+7+3+hsqG0WO/1Yl+6GU+t0TTMb9FhZJvCrLYoeJY\r\n"
+    "PrSj4RqvV+nyiseSW018iOlztONO8tqzuNpC0WoO4wyFr+M/vPX1sy+ifW+coccP\r\n"
+    "qZbWiJ9QkKhKnKAywJdYbDytlAnWUStdGXAGowIDAQABAoIBAHl6aucjkenmL60D\r\n"
+    "oZu1zuPfHWMAU1Yx2SIozx5eb8DiMEvHc0vw6wJYoJcXw0Lpt+fQGm07bVoBpydo\r\n"
+    "TPwv237BIzN5Xe0VgpYIe9mFf0uAT72epiQFw4TaOcYRylP2LmXKuqYhsWs4Naio\r\n"
+    "lxouFsZpQVeJoYodU36autvGhXitvcmgt07gQRTouctTUSIADh/owBEHKJ+95IT1\r\n"
+    "4zbiT6b7J5G/rkkbrpIMr8v9DD/xhNhF6ZAP+T5yzDdkqbEkG/XBfO4XKSDA+FrK\r\n"
+    "DdN3jWksAKAtVHY0Fo931iO+O4Ztp8PssuRMtXzzfmDVsAqdAmWDVA7ewqhXagy/\r\n"
+    "SFcLg7ECgYEA8tuTF+HO3jyZQdSDaekelzEeJ0v4HzYtQqffivWco+NMWh5FquRK\r\n"
+    "j0Eevf+2byrNNk7LScAWA4lqYkyZ45HIcz5ECKL2v7IiODK2eHuhXC3SA/yKvvhJ\r\n"
+    "uxbmlgQ6BHcdRdohZO1qLomkxylb3VCimiy3l8vyNnJFaW5RuyYASx0CgYEA3Odu\r\n"
+    "/zIWiGfmBCEI2cwTzPaP9pn6P0zQHBDEdvfCe5zGN4fAx0LrcU5dwDCqAsdshbov\r\n"
+    "jzBY1RphZpiB+/wLNAR8MXjIKSs9O9CG7zsVZV/A5Lfcz4VdyCwuyrV+TuwgnsO8\r\n"
+    "URB2tw1n+fMcY2AlPT0p04GjXUZwN4rLXctbLL8CgYEA7ZpkHE6Bra7OJrj7ZYh9\r\n"
+    "tGCK5tmNxUOlHnzN2c+ZVELS9ax+bsbyJ5wHrs5bOAJBSivm+p3jK8yq98eIHD0K\r\n"
+    "R64Ys/Z0wXJPxnnfSptycJQn0FyphlO3F0M9kHJMLQg47JmQaIVbiHKEc5KEXVBB\r\n"
+    "9eNgMDSKIjjErnUPo7F3QgUCgYEAzWpwbuIWzfU/kSte3ZjF+Nx2dqwsZlx5UP/O\r\n"
+    "kYpG0UexksWr4B88bPqgdy1JipgDND80JoSgtll3pT2/8aAoktBw5FgaWR4aLNr1\r\n"
+    "/tQES2ZFKupGbLrpwFBFmr42nBE7LCd7oC4dFo9i1qzZAxfOySltEX8FeKEdjKiF\r\n"
+    "/8wwFmUCgYBBIHLiKfgTIGQVhwOoJNLBCi7prgzMVHUTp0Z1pC4dZLxeRRAX2Yub\r\n"
+    "8vnbYypIbg1sVlphlz39ANWeId/1uFBWVtUHKOjCf4xBA5xda4d5kgcHxTlAOlEk\r\n"
+    "w1PeTxOe8D5fZ4XlKTjl2Qj6M4e4JGrXct0loNs0rDWTdo5hyB6O6w==\r\n"
+    "-----END RSA PRIVATE KEY-----\r\n";
+
+
+void example_do_connect(mqtt_client_t *client);
+
+static void mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status)
+{
+  // err_t err;
+  if(status == MQTT_CONNECT_ACCEPTED) {
+    printf("mqtt_connection_cb: Successfully connected\n");
+    example_publish(client, arg);
+  } else {
+    printf("mqtt_connection_cb: Disconnected, reason: %d\n", status);
+    /* Its more nice to be connected, so try to reconnect */
+    // osDelay(5000);
+    // example_do_connect(client);
+  }
+}
+
+void example_do_connect(mqtt_client_t *client)
+{
+  ip4_addr_t mserver;
+  struct mqtt_connect_client_info_t ci;
+  err_t err;
+
+  /* Setup an empty client info structure */
+  memset(&ci, 0, sizeof(ci));
+
+  /* Minimal amount of information required is client identifier, so set it here */
+  ci.client_id = "lwip_test";
+  ci.keep_alive = 0;
+  ci.tls_config = altcp_tls_create_config_client_2wayauth(
+		  ca_cert, sizeof(ca_cert), client_key, sizeof(client_key), 0, 0, client_cert, sizeof(client_cert)
+  );
+
+  /* Initiate client and connect to server, if this fails immediately an error code is returned
+     otherwise mqtt_connection_cb will be called with connection result after attempting
+     to establish a connection with the server.
+     For now MQTT version 3.1.1 is always used */
+
+  IP4_ADDR(&mserver, 192, 168, 0, 1);
+
+  err = mqtt_client_connect(client, &mserver, MQTT_TLS_PORT, mqtt_connection_cb, 0, &ci);
+  if(err != ERR_OK) {
+    printf("mqtt_connect return %d\n", err);
+  }
+}
+
+/* Called when publish is complete either with sucess or failure */
+static void mqtt_pub_request_cb(void *arg, err_t result)
+{
+  if(result != ERR_OK) {
+    printf("Publish result: %d\n", result);
+  }
+}
+
+void example_publish(mqtt_client_t *client, void *arg)
+{
+  const char *pub_payload= "PubSubHubLubJub";
+  err_t err;
+  u8_t qos = 2; /* 0 1 or 2, see MQTT specification */
+  u8_t retain = 0; /* No don't retain such crappy payload... */
+  err = mqtt_publish(client, "pub_topic", pub_payload, strlen(pub_payload), qos, retain, mqtt_pub_request_cb, arg);
+  if(err != ERR_OK) {
+    printf("Publish err: %d\n", err);
+  }
+}
+
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -844,9 +978,14 @@ static void MPU_Config_SDRAM(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */  
-  printf("MX_LWIP_Init before\n");
-  
   MX_LWIP_Init();
+  printf("MX_LWIP_Init after\n");
+
+  osDelay(3000);
+  mqtt_client_t *client = mqtt_client_new();
+  if(client != NULL) {
+    example_do_connect(client);
+  }
 
   /* Infinite loop */
   for(;;)

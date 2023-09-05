@@ -14,7 +14,11 @@
         "bpstruct.h": "c",
         "epstruct.h": "c",
         "ethernet.h": "c",
-        "etharp.h": "c"
+        "etharp.h": "c",
+        "altcp_tls.h": "c",
+        "mqtt.h": "c",
+        "threading.h": "c",
+        "ecp_internal.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false
 }

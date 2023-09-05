@@ -34,7 +34,6 @@
       ],
       "defines": [
         "MBEDTLS_CONFIG_FILE=\"<mbedtls_config.h>\"",
-        "MBEDTLS_NO_PLATFORM_ENTROPY",
         "STM32F746xx",
         "USE_HAL_DRIVER"
       ],

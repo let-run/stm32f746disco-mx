@@ -449,7 +449,8 @@ void ethernetif_input(void* argument)
     if (osSemaphoreAcquire(RxPktSemaphore, TIME_WAITING_FOR_INPUT) == osOK)
     {
       do
-      {
+      {   
+        // LOCK_TCPIP_CORE();
         p = low_level_input( netif );
         if (p != NULL)
         {
@@ -458,6 +459,7 @@ void ethernetif_input(void* argument)
             pbuf_free(p);
           }
         }
+        // UNLOCK_TCPIP_CORE();
       } while(p!=NULL);
     }
   }

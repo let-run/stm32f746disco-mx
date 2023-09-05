@@ -45,7 +45,6 @@ LWIP/Target/ethernetif.c \
 MBEDTLS/App/mbedtls.c \
 MBEDTLS/App/net_sockets.c \
 Drivers/BSP/Components/lan8742/lan8742.c \
-Drivers/BSP/Components/lan8742/lan8742.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_rcc_ex.c \
 Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_flash.c \
@@ -154,6 +153,8 @@ Middlewares/Third_Party/LwIP/src/core/ipv6/ip6_addr.c \
 Middlewares/Third_Party/LwIP/src/core/ipv6/ip6_frag.c \
 Middlewares/Third_Party/LwIP/system/OS/sys_arch.c \
 Middlewares/Third_Party/LwIP/src/apps/mqtt/mqtt.c \
+Middlewares/Third_Party/LwIP/src/apps/altcp_tls/altcp_tls_mbedtls_mem.c \
+Middlewares/Third_Party/LwIP/src/apps/altcp_tls/altcp_tls_mbedtls.c \
 Middlewares/Third_Party/mbedTLS/library/aes.c \
 Middlewares/Third_Party/mbedTLS/library/aesni.c \
 Middlewares/Third_Party/mbedTLS/library/arc4.c \
@@ -272,7 +273,6 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DUSE_HAL_DRIVER \
--DMBEDTLS_NO_PLATFORM_ENTROPY \
 -DMBEDTLS_CONFIG_FILE="<mbedtls_config.h>" \
 -DSTM32F746xx
 

@@ -4728,7 +4728,8 @@ exit:
 }
 #endif /* MBEDTLS_SSL_PROTO_DTLS */
 
-static int ssl_consume_current_message( mbedtls_ssl_context *ssl )
+static int 
+ssl_consume_current_message( mbedtls_ssl_context *ssl )
 {
     /*
      * Consume last content-layer message and potentially

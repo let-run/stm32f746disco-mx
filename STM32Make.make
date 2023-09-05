@@ -84,6 +84,8 @@ Middlewares/Third_Party/LwIP/src/api/netdb.c \
 Middlewares/Third_Party/LwIP/src/api/netifapi.c \
 Middlewares/Third_Party/LwIP/src/api/sockets.c \
 Middlewares/Third_Party/LwIP/src/api/tcpip.c \
+Middlewares/Third_Party/LwIP/src/apps/altcp_tls/altcp_tls_mbedtls.c \
+Middlewares/Third_Party/LwIP/src/apps/altcp_tls/altcp_tls_mbedtls_mem.c \
 Middlewares/Third_Party/LwIP/src/apps/mqtt/mqtt.c \
 Middlewares/Third_Party/LwIP/src/core/altcp.c \
 Middlewares/Third_Party/LwIP/src/core/altcp_alloc.c \
@@ -279,7 +281,6 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -DMBEDTLS_CONFIG_FILE="<mbedtls_config.h>" \
--DMBEDTLS_NO_PLATFORM_ENTROPY \
 -DSTM32F746xx \
 -DUSE_HAL_DRIVER
 
@@ -287,7 +288,6 @@ C_DEFS =  \
 # CXX defines
 CXX_DEFS =  \
 -DMBEDTLS_CONFIG_FILE="<mbedtls_config.h>" \
--DMBEDTLS_NO_PLATFORM_ENTROPY \
 -DSTM32F746xx \
 -DUSE_HAL_DRIVER
 
